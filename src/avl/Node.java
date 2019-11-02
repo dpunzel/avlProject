@@ -43,5 +43,7 @@ public class Node {
     }
 
     @Override
-    public String
+    public String toString() {
+        return "" + this.data;
+    }
 }
