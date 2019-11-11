@@ -12,11 +12,48 @@ public class AvlTree implements Tree{
         if (node == null) {
             return new Node(data);
         }
-        return null;
+
+        if (data < node.getData()) {
+            node.setLeftNode(insert(node.getLeftNode(), data));
+        } else {
+            node.setRightNode(insert(node.getRightNode(), data));
+        }
+
+        node.setHeight(Math.max(height(node.getLeftNode()), height(node.getRightNode())) + 1);
+        node = settleViolation(data, node);
+        return node;
+    }
+
+    private Node settleViolation(int data, Node node) {
+        int balance = getBalance(node);
+
+        // left heavy left left
+        if (balance > 1 && data < node.getLeftNode().getData()) {
+            return rightRotation(node);
+        }
+
+        // right heavy right right
+        if (balance < -1 && data > node.getRightNode().getData()) {
+            return leftRotation(node);
+        }
+
+        // left right heavy
+        if (balance > 1 && data > node.getLeftNode().getData()) {
+            node.setLeftNode(leftRotation(node.getLeftNode()));
+            return rightRotation(node);
+        }
+
+        // right left heavy
+        if (balance < -1 && data < node.getRightNode().getData()) {
+            node.setRightNode(rightRotation(node.getRightNode()));
+            return leftRotation(node);
+        }
+
+        return node;
     }
 
     private Node rightRotation(Node node) {
-        System.out.println("Rotating to the right...");
+        System.out.println("Rotating to the right on..." + node);
 
         Node tempLeftNode = node.getLeftNode();
         Node t = tempLeftNode.getRightNode();
@@ -31,7 +68,7 @@ public class AvlTree implements Tree{
     }
 
     private Node leftRotation(Node node) {
-        System.out.println("Rotating to the left...");
+        System.out.println("Rotating to the left on..." + node);
 
         Node tempRightNode = node.getRightNode();
         Node t = tempRightNode.getLeftNode();
@@ -61,19 +98,21 @@ public class AvlTree implements Tree{
 
     @Override
     public void traverse() {
-        if (root == null) {
-            inOrderTraversal(root);
-        }
+        if (root == null) return;
+
+        inOrderTraversal(root);
     }
 
     private void inOrderTraversal(Node node) {
-        if (node.getLeftNode() != null) {
+        if (node.getLeftNode() != null)
             inOrderTraversal(node.getLeftNode());
-        }
+
         System.out.println(node);
-        if (node.getRightNode() != null) {
+
+
+        if (node.getRightNode() != null)
             inOrderTraversal(node.getRightNode());
-        }
+
     }
 
 
