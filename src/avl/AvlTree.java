@@ -8,6 +8,11 @@ public class AvlTree implements Tree{
         root = insert(root, data);
     }
 
+    @Override
+    public void delete(int data) {
+        root = delete(root, data);
+    }
+
     private Node insert(Node node, int data) {
         if (node == null) {
             return new Node(data);
@@ -22,6 +27,78 @@ public class AvlTree implements Tree{
         node.setHeight(Math.max(height(node.getLeftNode()), height(node.getRightNode())) + 1);
         node = settleViolation(data, node);
         return node;
+    }
+
+    private Node delete(Node node, int data) {
+        if (node == null) return node;
+
+        // look for node to get rid of
+        if (data < node.getData()) {
+            node.setLeftNode(delete(node.getLeftNode(), data));
+        } else if (data > node.getData()) {
+            node.setRightNode(delete(node.getRightNode(), data));
+        } else { // found the node to remove
+            if (node.getLeftNode() == null && node.getRightNode() == null) {
+                System.out.println("Removing a leaf node...");
+                return null;
+            }
+
+            if (node.getLeftNode() == null) {
+                System.out.println("Removing the right child...");
+                Node tempNode = node. getRightNode();
+                node = null;
+                return tempNode;
+            }
+
+            if (node.getRightNode() == null) {
+                System.out.println("Removing the left child...");
+                Node tempNode = node. getLeftNode();
+                node = null;
+                return tempNode;
+            }
+
+            System.out.println("Removing item with two children");
+            Node tempNode = getPredecessor(node.getLeftNode());
+
+            node.setData(tempNode.getData());
+            node.setLeftNode(delete(node.getLeftNode(), tempNode.getData()));
+        }
+
+        node.setHeight(Math.max(height(node.getLeftNode()), height(node.getRightNode())) + 1);
+        // check on every deletion operation whether the tree has become unbalanced or not
+        return settleDeletion(node);
+    }
+
+    private Node settleDeletion(Node node) {
+        int balance = getBalance(node);
+        // check if left heavy
+        if (balance > 1) {
+            // left right heavy situation: left rotation on parent + right
+            // rotation of grandparent
+            if (getBalance(node.getLeftNode()) < 0) {
+                node.setLeftNode(leftRotation(node.getLeftNode()));
+            }
+            // right rotation on grandparent
+            return rightRotation(node);
+        }
+
+        // right left heavy
+        if (balance < -1) {
+            if (getBalance(node.getRightNode()) > 0) {
+                node.setRightNode(rightRotation(node.getRightNode()));
+            }
+            return leftRotation(node);
+        }
+        return node;
+    }
+
+    private Node getPredecessor(Node node) {
+        Node predecessor = node;
+
+        while (predecessor.getRightNode() != null)
+            predecessor = predecessor.getRightNode();
+
+        return predecessor;
     }
 
     private Node settleViolation(int data, Node node) {
